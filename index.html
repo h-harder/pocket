@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pocket</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><path d='M5 6h22v12a11 11 0 0 1-22 0z' fill='%23e8a13a'/><path d='M5 11h22' stroke='%231d2433' stroke-width='2' stroke-dasharray='3 2'/></svg>">
+<style>
+  :root {
+    --bg: #f4f1ea;
+    --surface: #fffdf8;
+    --ink: #1d2433;
+    --muted: #6b7180;
+    --line: #ddd6c8;
+    --accent: #c9781a;
+    --accent-ink: #fff;
+    --found: #2f7d5b;
+    --danger: #b3402f;
+    --radius: 14px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141821;
+      --surface: #1c222e;
+      --ink: #ece7dc;
+      --muted: #98a0b0;
+      --line: #2e3646;
+      --accent: #e8a13a;
+      --accent-ink: #1d2433;
+      --found: #5fc296;
+      --danger: #ec7b69;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 80px; }
+
+  header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .wordmark {
+    font: 700 28px/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    letter-spacing: -0.04em; margin: 0;
+  }
+  .wordmark span { color: var(--accent); }
+  .tagline { color: var(--muted); font-size: 14px; margin: 0; text-align: right; }
+
+  /* Hero: the big number sits inside a pocket shape */
+  .hero { display: flex; flex-wrap: wrap; gap: 20px; align-items: center; margin: 28px 0; }
+  .pocket {
+    flex: 0 0 auto; width: 190px; height: 200px; position: relative;
+    background: var(--surface); border: 2px solid var(--ink);
+    border-radius: 10px 10px 95px 95px / 10px 10px 80px 80px;
+    display: grid; place-items: center; text-align: center;
+  }
+  .pocket::before {
+    content: ""; position: absolute; inset: 7px;
+    border: 2px dashed var(--accent); border-radius: inherit; pointer-events: none;
+  }
+  .pocket b {
+    display: block; font: 700 72px/1 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-variant-numeric: tabular-nums; letter-spacing: -0.05em;
+  }
+  .pocket small { color: var(--muted); font-size: 13px; }
+  .stats { flex: 1 1 260px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0; }
+  .stats div { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px 14px; min-width: 0; }
+  .stats dt { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .stats dd { margin: 2px 0 0; font-weight: 650; font-size: 18px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  section { margin-top: 28px; }
+  h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 10px; }
+
+  form {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 16px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  }
+  label { display: grid; gap: 4px; font-size: 13px; color: var(--muted); min-width: 0; }
+  label.wide { grid-column: 1 / -1; }
+  input, select {
+    font: inherit; color: var(--ink); background: var(--bg);
+    border: 1px solid var(--line); border-radius: 9px; padding: 9px 11px; width: 100%; min-width: 0;
+  }
+  input:focus-visible, select:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  button { font: inherit; cursor: pointer; border-radius: 9px; border: 1px solid var(--line); background: transparent; color: var(--ink); padding: 8px 12px; }
+  button.primary { grid-column: 1 / -1; background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 650; padding: 11px; }
+  button.primary:hover { filter: brightness(1.07); }
+  button.ghost { font-size: 13px; padding: 5px 10px; color: var(--muted); }
+  button.ghost:hover { color: var(--ink); border-color: var(--muted); }
+
+  .board { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .board li { display: grid; grid-template-columns: 110px 1fr 32px; gap: 10px; align-items: center; font-size: 14px; }
+  .board .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .board .bar { height: 10px; border-radius: 5px; background: var(--accent); min-width: 4px; }
+  .board .n { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+
+  .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .toolbar h2 { margin: 0; }
+  .toolbar .actions { display: flex; gap: 6px; flex-wrap: wrap; }
+  .toolbar select { width: auto; font-size: 13px; padding: 5px 8px; }
+
+  .log { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .log li {
+    background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 12px 14px; display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center;
+  }
+  .log .what { font-weight: 650; overflow-wrap: anywhere; }
+  .log .what em { font-style: normal; font-weight: 400; color: var(--muted); }
+  .log .meta { color: var(--muted); font-size: 13px; overflow-wrap: anywhere; }
+  .log .btns { grid-row: 1 / span 2; grid-column: 2; display: flex; gap: 6px; align-items: center; }
+  .badge { font-size: 12px; border-radius: 99px; padding: 2px 9px; border: 1px solid currentColor; white-space: nowrap; }
+  .badge.planted { color: var(--accent); }
+  .badge.found { color: var(--found); }
+  .log li.found .what { text-decoration: line-through; text-decoration-color: var(--muted); }
+  button.del:hover { color: var(--danger); border-color: var(--danger); }
+  .empty { color: var(--muted); text-align: center; padding: 28px 12px; border: 1px dashed var(--line); border-radius: var(--radius); }
+
+  @media (max-width: 520px) {
+    form { grid-template-columns: 1fr; }
+    .pocket { margin: 0 auto; }
+    .tagline { display: none; }
+    .log li { grid-template-columns: 1fr; }
+    .log .btns { grid-row: auto; grid-column: 1; margin-top: 6px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1 class="wordmark">pocket<span>_</span></h1>
+    <p class="tagline">A ledger of things that were not in that pocket this morning.</p>
+  </header>
+
+  <div class="hero">
+    <div class="pocket" aria-live="polite">
+      <div><b id="total">0</b><small>things snuck</small></div>
+    </div>
+    <dl class="stats">
+      <div><dt>Still undiscovered</dt><dd id="s-planted">0</dd></div>
+      <div><dt>Busted</dt><dd id="s-found">0</dd></div>
+      <div><dt>Favorite target</dt><dd id="s-target">—</dd></div>
+      <div><dt>Go-to item</dt><dd id="s-item">—</dd></div>
+    </dl>
+  </div>
+
+  <section>
+    <h2>Log a drop</h2>
+    <form id="form" autocomplete="off">
+      <label>What went in
+        <input id="f-item" list="items" placeholder="M3 bolt, zip tie, googly eye…" required maxlength="80">
+      </label>
+      <label>Whose pocket
+        <input id="f-person" list="people" placeholder="Name" required maxlength="40">
+      </label>
+      <label>How many
+        <input id="f-qty" type="number" min="1" max="999" value="1" required>
+      </label>
+      <label>When
+        <input id="f-date" type="date" required>
+      </label>
+      <label class="wide">Note (optional)
+        <input id="f-note" placeholder="Lab coat, left side, during standup" maxlength="140">
+      </label>
+      <button class="primary" type="submit">Slip it in</button>
+      <datalist id="items"></datalist>
+      <datalist id="people"></datalist>
+    </form>
+  </section>
+
+  <section id="board-section" hidden>
+    <h2>Pocket leaderboard</h2>
+    <ol class="board" id="board"></ol>
+  </section>
+
+  <section>
+    <div class="toolbar">
+      <h2>The ledger</h2>
+      <div class="actions">
+        <select id="filter" aria-label="Filter">
+          <option value="all">All</option>
+          <option value="planted">Undiscovered</option>
+          <option value="found">Busted</option>
+        </select>
+        <button class="ghost" id="export" type="button">Export</button>
+        <button class="ghost" id="import" type="button">Import</button>
+        <input id="file" type="file" accept="application/json,.json" hidden>
+      </div>
+    </div>
+    <ul class="log" id="log"></ul>
+  </section>
+</main>
+
+<script>
+(() => {
+  const KEY = 'pocket.drops.v1';
+  const $ = id => document.getElementById(id);
+  const el = (tag, cls, text) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (text != null) n.textContent = text;
+    return n;
+  };
+
+  let drops = [];
+  try { drops = JSON.parse(localStorage.getItem(KEY)) || []; } catch { drops = []; }
+  if (!Array.isArray(drops)) drops = [];
+
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(drops)); } catch {} };
+  const today = () => {
+    const d = new Date();
+    return new Date(d - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  };
+  const fmtDate = s => {
+    const d = new Date(s + 'T00:00');
+    return isNaN(d) ? s : d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
+  };
+  // Tally quantities by a key, keeping the first-seen spelling as the label.
+  const tally = field => {
+    const m = new Map();
+    for (const d of drops) {
+      const k = d[field].trim().toLowerCase();
+      const e = m.get(k) || { label: d[field].trim(), n: 0 };
+      e.n += d.qty;
+      m.set(k, e);
+    }
+    return [...m.values()].sort((a, b) => b.n - a.n);
+  };
+
+  function render() {
+    const sum = list => list.reduce((t, d) => t + d.qty, 0);
+    const found = sum(drops.filter(d => d.found));
+    const total = sum(drops);
+    $('total').textContent = total;
+    $('s-planted').textContent = total - found;
+    $('s-found').textContent = found;
+
+    const people = tally('person'), items = tally('item');
+    $('s-target').textContent = people[0] ? people[0].label : '—';
+    $('s-item').textContent = items[0] ? items[0].label : '—';
+
+    $('people').replaceChildren(...people.map(p => Object.assign(el('option'), { value: p.label })));
+    $('items').replaceChildren(...items.map(p => Object.assign(el('option'), { value: p.label })));
+
+    $('board-section').hidden = people.length === 0;
+    $('board').replaceChildren(...people.slice(0, 8).map(p => {
+      const li = el('li');
+      const bar = el('div', 'bar');
+      bar.style.width = (p.n / people[0].n * 100) + '%';
+      li.append(el('span', 'name', p.label), el('div'), el('span', 'n', p.n));
+      li.children[1].append(bar);
+      return li;
+    }));
+
+    const filter = $('filter').value;
+    const shown = drops
+      .filter(d => filter === 'all' || (filter === 'found') === !!d.found)
+      .sort((a, b) => b.date.localeCompare(a.date) || b.id - a.id);
+
+    if (!shown.length) {
+      $('log').replaceChildren(el('li', 'empty',
+        drops.length ? 'Nothing matches that filter.' : 'No drops yet. Every pocket in the lab is suspiciously empty.'));
+      $('log').firstChild.style.display = 'block';
+      return;
+    }
+    $('log').replaceChildren(...shown.map(d => {
+      const li = el('li', d.found ? 'found' : '');
+      const what = el('div', 'what', (d.qty > 1 ? d.qty + '× ' : '') + d.item + ' ');
+      what.append(el('em', '', '→ ' + d.person));
+      const meta = el('div', 'meta', fmtDate(d.date) + (d.note ? ' · ' + d.note : ''));
+      const btns = el('div', 'btns');
+      btns.append(el('span', 'badge ' + (d.found ? 'found' : 'planted'), d.found ? 'Busted' : 'Undiscovered'));
+      const toggle = el('button', 'ghost', d.found ? 'Undo' : 'They found it');
+      toggle.type = 'button';
+      toggle.onclick = () => { d.found = !d.found; save(); render(); };
+      const del = el('button', 'ghost del', 'Delete');
+      del.type = 'button';
+      del.setAttribute('aria-label', 'Delete ' + d.item + ' for ' + d.person);
+      del.onclick = () => {
+        if (!confirm('Delete this drop from the ledger?')) return;
+        drops = drops.filter(x => x !== d); save(); render();
+      };
+      btns.append(toggle, del);
+      li.append(what, btns, meta);
+      return li;
+    }));
+  }
+
+  const clean = d => ({
+    id: Number(d.id) || Date.now() + Math.random(),
+    item: String(d.item || '').slice(0, 80).trim(),
+    person: String(d.person || '').slice(0, 40).trim(),
+    qty: Math.min(999, Math.max(1, Math.floor(Number(d.qty)) || 1)),
+    date: /^\d{4}-\d{2}-\d{2}$/.test(d.date) ? d.date : today(),
+    note: String(d.note || '').slice(0, 140).trim(),
+    found: !!d.found,
+  });
+
+  $('form').addEventListener('submit', e => {
+    e.preventDefault();
+    const d = clean({
+      id: Date.now(), item: $('f-item').value, person: $('f-person').value,
+      qty: $('f-qty').value, date: $('f-date').value, note: $('f-note').value,
+    });
+    if (!d.item || !d.person) return;
+    drops.push(d); save(); render();
+    $('f-item').value = ''; $('f-note').value = ''; $('f-qty').value = 1;
+    $('f-item').focus();
+  });
+
+  $('filter').addEventListener('change', render);
+
+  $('export').addEventListener('click', () => {
+    const a = el('a');
+    a.href = URL.createObjectURL(new Blob([JSON.stringify(drops, null, 2)], { type: 'application/json' }));
+    a.download = 'pocket-ledger-' + today() + '.json';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+  $('import').addEventListener('click', () => $('file').click());
+  $('file').addEventListener('change', async e => {
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (!file) return;
+    try {
+      const data = JSON.parse(await file.text());
+      if (!Array.isArray(data)) throw new Error();
+      const incoming = data.map(clean).filter(d => d.item && d.person);
+      const ids = new Set(drops.map(d => d.id));
+      const fresh = incoming.filter(d => !ids.has(d.id));
+      drops.push(...fresh); save(); render();
+      alert('Imported ' + fresh.length + ' drop' + (fresh.length === 1 ? '' : 's') + '.');
+    } catch {
+      alert('That file is not a Pocket export.');
+    }
+  });
+
+  $('f-date').value = today();
+  drops = drops.map(clean).filter(d => d.item && d.person);
+  render();
+})();
+</script>
+</body>
+</html>
